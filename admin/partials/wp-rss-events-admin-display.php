@@ -12,5 +12,4 @@
  * @subpackage Wp_Rss_Events/admin/partials
  */
 ?>
-
-<!-- This file should primarily consist of HTML with a little bit of PHP. -->
+Hellow WOlrd
