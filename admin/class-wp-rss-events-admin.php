@@ -166,6 +166,11 @@ class Wp_Rss_Events_Admin {
 
 		
 	}
+	/**
+	 *  Options Page Menu
+	 *
+	 * @since    1.0.0
+	 */
 	public function admin_menu(){
 		add_submenu_page(
 			'edit.php?post_type=events',
@@ -173,21 +178,35 @@ class Wp_Rss_Events_Admin {
 			__( 'Event Importer', 'wp-rss-events' ),
 			'manage_options',
 			'event-importer',
-			array($this,'page_importer'),
+			array($this,'page_importer')
 		);
 		
 	}
+	
+	/**
+	 * Option page 
+	 *
+	 * @since    1.0.0
+	 */
 
 	public function  page_importer(){
 		require_once 'partials/wp-rss-events-admin-display.php';
 	}
 
-
-	
-
+	/**
+	 * convert to date
+	 *
+	 * @since    1.0.0
+	 */
 	public function toDate($d){
 		return date('l F d, Y', strtotime($d));
 	}
+	
+	/**
+	 * Events importer
+	 *
+	 * @since    1.0.0
+	 */
    
 	public function importer(){
 
@@ -266,6 +285,12 @@ class Wp_Rss_Events_Admin {
 
 	}
 
+	/**
+	 * Import and attach thumbnails
+	 *
+	 * @since    1.0.0
+	 */
+
 	function attach_thumbnail($post_id,$image_url){
 
 		$image_name       =basename($image_url);
@@ -301,7 +326,7 @@ class Wp_Rss_Events_Admin {
 		// Include image.php
 		
 		require_once(ABSPATH . 'wp-admin/includes/image.php');
-		
+
 		$attach_data = wp_generate_attachment_metadata( $attach_id, $file );
 
 		// Assign metadata to attachment
@@ -313,8 +338,6 @@ class Wp_Rss_Events_Admin {
 	}
 
 	
-
-
 	/**
 	 * Add "Custom" template to page attirbute template section.
 	 */
