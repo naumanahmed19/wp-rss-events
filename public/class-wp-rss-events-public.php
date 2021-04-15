@@ -104,7 +104,7 @@ class Wp_Rss_Events_Public {
 	public function register_event_template( $page_template ){
 	
 		if ( get_page_template_slug() == 'template-events.php' ) {
-			$page_template = require_once 'partials/template-events.php';
+			$page_template = dirname(__DIR__) . '/public/partials/template-events.php';
 		}
 		return $page_template;
 	}
