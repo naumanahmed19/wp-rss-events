@@ -160,7 +160,13 @@ class Wp_Rss_Events {
 		$this->loader->add_action('admin_menu',$plugin_admin,'admin_menu');
 
 		$this->loader->add_action('init',$plugin_admin,'register_events_post_type');
+
+		
+		$this->loader->add_action('wp_ajax_rss_events_importer',$plugin_admin,'importer');
 	
+		$this->loader->add_filter( 'theme_page_templates',$plugin_admin, 'brand_add_template_to_select', 10, 4 );
+
+
 	}
 
 	/**
@@ -175,7 +181,10 @@ class Wp_Rss_Events {
 		$plugin_public = new Wp_Rss_Events_Public( $this->get_plugin_name(), $this->get_version() );
 
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
+		
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
+
+		$this->loader->add_filter( 'page_template',$plugin_public, 'register_event_template' );
 
 	}
 
