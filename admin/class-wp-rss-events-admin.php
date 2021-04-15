@@ -243,6 +243,17 @@ class Wp_Rss_Events_Admin {
 
 	}
 
+	
 
+
+	/**
+	 * Add "Custom" template to page attirbute template section.
+	 */
+	function brand_add_template_to_select( $post_templates, $wp_theme, $post, $post_type ) {
+
+		$post_templates['template-events.php'] = __('Events Template');
+
+		return $post_templates;
+	}
 
 }

@@ -37,6 +37,8 @@ if ( ! defined( 'WPINC' ) ) {
  */
 define( 'WP_RSS_EVENTS_VERSION', '1.0.0' );
 
+
+
 /**
  * The code that runs during plugin activation.
  * This action is documented in includes/class-wp-rss-events-activator.php
