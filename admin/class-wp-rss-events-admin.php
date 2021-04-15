@@ -193,15 +193,7 @@ class Wp_Rss_Events_Admin {
 		require_once 'partials/wp-rss-events-admin-display.php';
 	}
 
-	/**
-	 * convert to date
-	 *
-	 * @since    1.0.0
-	 */
-	public function toDate($d){
-		return date('l F d, Y', strtotime($d));
-	}
-	
+
 	/**
 	 * Events importer
 	 *
@@ -251,11 +243,11 @@ class Wp_Rss_Events_Admin {
 			   $description = $feed[$x]['desc'];
 			   $availability = $feed[$x]['availability'];
 			   $availability_date = $feed[$x]['availability_date'];
-			   $expiration_date =  $this->toDate($feed[$x]['expiration_date']);
+			   $expiration_date =  $feed[$x]['expiration_date'];
 			   $price = $feed[$x]['price'];
 			   $custom_label_0 = $feed[$x]['custom_label_0'];
-			   $custom_label_2 =  $this->toDate($feed[$x]['custom_label_2']);
-			   $custom_label_1 =   $this->toDate($feed[$x]['custom_label_1']);
+			   $custom_label_2 = $feed[$x]['custom_label_2'];
+			   $custom_label_1 = $feed[$x]['custom_label_1'];
 			   $custom_label_3 = $feed[$x]['custom_label_3'];
 
 		
