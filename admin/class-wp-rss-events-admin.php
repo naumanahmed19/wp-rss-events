@@ -96,8 +96,14 @@ class Wp_Rss_Events_Admin {
 		 * class.
 		 */
 
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/wp-rss-events-admin.js', array( 'jquery' ), $this->version, false );
+		// Localize the script with new data
+		
 
+
+		wp_enqueue_script($this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/wp-rss-events-admin.js', array( 'jquery' ), $this->version, false );
+		wp_localize_script($this->plugin_name, 'frontend_ajax_object', array(
+			'ajaxurl' => admin_url('admin-ajax.php')
+		));
 	}
 
 	/**
@@ -175,5 +181,68 @@ class Wp_Rss_Events_Admin {
 	public function  page_importer(){
 		require_once 'partials/wp-rss-events-admin-display.php';
 	}
+
+
+	
+
+	public function toDate($d){
+		return date('l F d, Y', strtotime($d));
+	}
+   
+	public function importer(){
+
+			$uri = 'https://www.demeerse.nl/agenda/?feed=adwords_xml_events';
+		   $rss = new DOMDocument();
+		   $rss->load( $uri);
+		   $feed = array();
+		   foreach ($rss->getElementsByTagName('item') as $node) {
+			   $item = array ( 
+				   'title' => $node->getElementsByTagName('title')->item(0)->nodeValue,
+				   'desc' => $node->getElementsByTagName('description')->item(0)->nodeValue,
+				   'link' => $node->getElementsByTagName('link')->item(0)->nodeValue,
+				   'image_link' => $node->getElementsByTagName('image_link')->item(0)->nodeValue,
+				   'availability' => $node->getElementsByTagName('availability')->item(0)->nodeValue,
+				   'availability_date' => $node->getElementsByTagName('availability_date')->item(0)->nodeValue,
+				   'expiration_date' => $node->getElementsByTagName('expiration_date')->item(0)->nodeValue,
+				   'price' => $node->getElementsByTagName('price')->item(0)->nodeValue,
+				   'custom_label_0' => $node->getElementsByTagName('custom_label_0')->item(0)->nodeValue,
+				   'custom_label_1' => $node->getElementsByTagName('custom_label_1')->item(0)->nodeValue,
+				   'custom_label_2' => $node->getElementsByTagName('custom_label_2')->item(0)->nodeValue,
+				   'custom_label_3' => $node->getElementsByTagName('custom_label_3')->item(0)->nodeValue,
+				   );
+			   array_push($feed, $item);
+		   }
+		   $limit = 5;
+	   
+	   
+		   for($x=0;$x<$limit;$x++) {
+			   $title = str_replace(' & ', ' &amp; ', $feed[$x]['title']);
+			   $link = $feed[$x]['link'];
+			   $image_link = $feed[$x]['image_link'];
+			   $description = $feed[$x]['desc'];
+			   $availability = $feed[$x]['availability'];
+			   $availability_date = $feed[$x]['availability_date'];
+			   $expiration_date =  $this->toDate($feed[$x]['expiration_date']);
+			   $price = $feed[$x]['price'];
+			   $custom_label_0 = $feed[$x]['custom_label_0'];
+			   $custom_label_2 =  $this->toDate($feed[$x]['custom_label_2']);
+			   $custom_label_1 =   $this->toDate($feed[$x]['custom_label_1']);
+			   $custom_label_3 = $feed[$x]['custom_label_3'];
+	   
+			   $post_information = array(
+				   'post_title' =>$title,
+				   'post_content' => $description,
+				   'post_type' => 'events',
+				   'post_status' => 'publish',
+				   'post_date' => date('Y-m-d H:i:s')
+			   );
+	   
+			   wp_insert_post( $post_information );    
+		
+		   }
+
+	}
+
+
 
 }
