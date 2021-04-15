@@ -147,7 +147,7 @@ class Wp_Rss_Events_Admin {
 			'description'           => __( 'Event Description', 'text_domain' ),
 			'labels'                => $labels,
 			'supports'              => array( 'title', 'editor','thumbnail' ),
-			'taxonomies'            => array( 'category', 'post_tag' ),
+			'taxonomies'            => array( ),
 			'hierarchical'          => false,
 			'public'                => true,
 			'show_ui'               => true,
@@ -191,10 +191,20 @@ class Wp_Rss_Events_Admin {
    
 	public function importer(){
 
-			$uri = 'https://www.demeerse.nl/agenda/?feed=adwords_xml_events';
+		/**
+		 * Delete all posts before import
+		 */
+
+		$allposts= get_posts( array('post_type'=>'events','numberposts'=>-1) );
+		foreach ($allposts as $eachpost) {
+			wp_delete_post( $eachpost->ID, true);
+		}
+
+		   $uri = 'https://www.demeerse.nl/agenda/?feed=adwords_xml_events';
 		   $rss = new DOMDocument();
 		   $rss->load( $uri);
 		   $feed = array();
+		   
 		   foreach ($rss->getElementsByTagName('item') as $node) {
 			   $item = array ( 
 				   'title' => $node->getElementsByTagName('title')->item(0)->nodeValue,
@@ -212,9 +222,9 @@ class Wp_Rss_Events_Admin {
 				   );
 			   array_push($feed, $item);
 		   }
-		   $limit = 5;
-	   
-	   
+
+		   $limit =  10;
+
 		   for($x=0;$x<$limit;$x++) {
 			   $title = str_replace(' & ', ' &amp; ', $feed[$x]['title']);
 			   $link = $feed[$x]['link'];
@@ -229,8 +239,7 @@ class Wp_Rss_Events_Admin {
 			   $custom_label_1 =   $this->toDate($feed[$x]['custom_label_1']);
 			   $custom_label_3 = $feed[$x]['custom_label_3'];
 
-			  
-	   
+		
 			   $post_information = array(
 				   'post_title' =>$title,
 				   'post_content' => $description,
@@ -250,11 +259,7 @@ class Wp_Rss_Events_Admin {
 					),
 			   );
 
-			  
-			 
-	   
-			   $post_id  =  wp_insert_post( $post_information );    
-
+			   $post_id  =  wp_insert_post( $post_information ); 
 			   $this->attach_thumbnail($post_id , $image_link );	
 		
 		   }
@@ -265,10 +270,10 @@ class Wp_Rss_Events_Admin {
 
 		$image_name       =basename($image_url);
 		$upload_dir       = wp_upload_dir(); // Set upload folder
-		$image_data       = file_get_contents($image_url); // Get image data
+		$image_data       = file_get_contents($image_url,0, stream_context_create(["http"=>["timeout"=>1]])); // Get image data
+	
 		$unique_file_name = wp_unique_filename( $upload_dir['path'], $image_name ); // Generate unique name
 		$filename         = basename( $unique_file_name ); // Create image file name
-		
 		// Check folder permission and define file location
 		if( wp_mkdir_p( $upload_dir['path'] ) ) {
 			$file = $upload_dir['path'] . '/' . $filename;
@@ -294,11 +299,11 @@ class Wp_Rss_Events_Admin {
 		$attach_id = wp_insert_attachment( $attachment, $file, $post_id );
 		
 		// Include image.php
+		
 		require_once(ABSPATH . 'wp-admin/includes/image.php');
 		
-		// Define attachment metadata
 		$attach_data = wp_generate_attachment_metadata( $attach_id, $file );
-		
+
 		// Assign metadata to attachment
 		wp_update_attachment_metadata( $attach_id, $attach_data );
 		
