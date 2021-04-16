@@ -194,6 +194,10 @@ class Wp_Rss_Events_Admin {
 	}
 
 
+	public function getItem($item,$tag){
+		return $item->get_item_tags('http://base.google.com/ns/1.0', $tag)[0]['data'];
+	}	
+
 	/**
 	 * Events importer
 	 *
@@ -211,69 +215,48 @@ class Wp_Rss_Events_Admin {
 			wp_delete_post( $eachpost->ID, true);
 		}
 
-		   $uri = 'https://www.demeerse.nl/agenda/?feed=adwords_xml_events';
-		   $rss = new DOMDocument();
-		   $rss->load( $uri);
-		   $feed = array();
-		   
-		   foreach ($rss->getElementsByTagName('item') as $node) {
-			   $item = array ( 
-				   'title' => $node->getElementsByTagName('title')->item(0)->nodeValue,
-				   'desc' => $node->getElementsByTagName('description')->item(0)->nodeValue,
-				   'link' => $node->getElementsByTagName('link')->item(0)->nodeValue,
-				   'image_link' => $node->getElementsByTagName('image_link')->item(0)->nodeValue,
-				   'availability' => $node->getElementsByTagName('availability')->item(0)->nodeValue,
-				   'availability_date' => $node->getElementsByTagName('availability_date')->item(0)->nodeValue,
-				   'expiration_date' => $node->getElementsByTagName('expiration_date')->item(0)->nodeValue,
-				   'price' => $node->getElementsByTagName('price')->item(0)->nodeValue,
-				   'custom_label_0' => $node->getElementsByTagName('custom_label_0')->item(0)->nodeValue,
-				   'custom_label_1' => $node->getElementsByTagName('custom_label_1')->item(0)->nodeValue,
-				   'custom_label_2' => $node->getElementsByTagName('custom_label_2')->item(0)->nodeValue,
-				   'custom_label_3' => $node->getElementsByTagName('custom_label_3')->item(0)->nodeValue,
-				   );
-			   array_push($feed, $item);
-		   }
 
-		   $limit =  10;
+		$uri = 'https://www.demeerse.nl/agenda/?feed=adwords_xml_events';
+		$rss = fetch_feed($uri);
 
-		   for($x=0;$x<$limit;$x++) {
-			   $title = str_replace(' & ', ' &amp; ', $feed[$x]['title']);
-			   $link = $feed[$x]['link'];
-			   $image_link = $feed[$x]['image_link'];
-			   $description = $feed[$x]['desc'];
-			   $availability = $feed[$x]['availability'];
-			   $availability_date = $feed[$x]['availability_date'];
-			   $expiration_date =  $feed[$x]['expiration_date'];
-			   $price = $feed[$x]['price'];
-			   $custom_label_0 = $feed[$x]['custom_label_0'];
-			   $custom_label_2 = $feed[$x]['custom_label_2'];
-			   $custom_label_1 = $feed[$x]['custom_label_1'];
-			   $custom_label_3 = $feed[$x]['custom_label_3'];
-
+		$feed = array();
+		$limit = 10;
 		
-			   $post_information = array(
-				   'post_title' =>$title,
-				   'post_content' => $description,
-				   'post_type' => 'events',
-				   'post_status' => 'publish',
-				   'post_date' => date('Y-m-d H:i:s'),
-					'meta_input' => array(
-						'link' =>  $link,
-						'custom_label_0'=>  $custom_label_0 ,
-						'custom_label_1' => $custom_label_1 ,
-						'custom_label_2' => $custom_label_2 ,
-						'custom_label_3'=> $custom_label_3 ,
-						'price'=> $price ,
-						'availability'=>  $availability ,
-						'availability_date'=>  $availability_date ,
-						'expiration_date' =>  $expiration_date ,
-					),
-			   );
-
-			   $post_id  =  wp_insert_post( $post_information ); 
-			   $this->attach_thumbnail($post_id , $image_link );	
 		
-		   }
+		foreach ($rss ->get_items(0,$limit) as $key => $item){
+			$item = array ( 
+				'title' => $this->getItem($item,'title'),
+				'description' =>  $this->getItem($item,'description'),
+				'link' =>  $this->getItem($item,'link'),
+				'image_link' => $this->getItem($item,'image_link'),
+				'custom_label_1' =>  $this->getItem($item,'title'),
+
+			);
+			array_push($feed, $item);
+		}
+	
+		for($x=0;$x<$limit;$x++) {
+			$title = str_replace(' & ', ' &amp; ', $feed[$x]['title']);
+			$link = $feed[$x]['link'];
+			$image_link = $feed[$x]['image_link'];
+			$description = $feed[$x]['description'];
+			$custom_label_1 = $feed[$x]['custom_label_1'];
+
+			$post_information = array(
+				'post_title' =>$title,
+				'post_content' => $description,
+				'post_type' => 'events',
+				'post_status' => 'publish',
+				'post_date' => date('Y-m-d H:i:s'),
+				'meta_input' => array(
+					'link' =>  $link,
+					'custom_label_1' => $custom_label_1 ,
+				),
+			);
+			$post_id  =  wp_insert_post( $post_information ); 
+			$this->attach_thumbnail($post_id , $image_link );	
+	
+		}
 
 	}
 
